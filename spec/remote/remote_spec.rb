@@ -251,7 +251,7 @@ if run_remote_tests?
         lambda{
           @subscription.credit(:amount => 7, :memo => 'credit')
         }.should change{@subscription.reload.transactions.size}.by(1)
-        @subscription.transactions.first.amount_in_cents.should == 700
+        @subscription.transactions.first.amount_in_cents.should == -700
       end
     end
     
@@ -276,6 +276,39 @@ if run_remote_tests?
         }.should change{@subscription.reload.transactions.size}.by(1)
         @subscription.transactions.first.amount_in_cents.should == 700
         @subscription.transactions.first.transaction_type.should == 'refund'
+      end
+    end
+    
+    describe "getting a list of statements" do
+      before(:each) do
+        @subscription = create_once(:subscription) do
+          Chargify::Subscription.create(
+            :product_handle => @@pro_plan.handle,
+            :customer_reference => @@johnadoe.reference,
+            :payment_profile_attributes => good_payment_profile_attributes
+          )
+        end
+      end
+      it "returns a list of statements" do
+        subscription = Chargify::Subscription.find(:all).last
+        subscription.statements.size.should == 1
+      end
+    end
+    
+    describe "getting a single statement" do
+      before(:each) do
+        @subscription = create_once(:subscription) do
+          Chargify::Subscription.create(
+            :product_handle => @@pro_plan.handle,
+            :customer_reference => @@johnadoe.reference,
+            :payment_profile_attributes => good_payment_profile_attributes
+          )
+        end
+      end
+      it "returns a single statement" do
+        subscription = Chargify::Subscription.find(:all).last
+        id = subscription.statements.first.id
+        Chargify::Statement.find(id).should_not be_nil
       end
     end
     

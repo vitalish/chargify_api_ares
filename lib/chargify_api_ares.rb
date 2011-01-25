@@ -63,6 +63,7 @@ module Chargify
 
       Base.site                     = site
       Subscription::Component.site  = site + "/subscriptions/:subscription_id"
+      Subscription::Statement.site  = site + "/subscriptions/:subscription_id"
     end
   end
   
@@ -161,11 +162,19 @@ module Chargify
       Transaction.find(:all, :params =>{:subscription_id => self.id})
     end
     
+    def statements(params = {})
+      params.merge!({:subscription_id => self.id})
+      Statement.find(:all, :params => params)
+    end
+    
     class Component < Base
       # All Subscription Components are considered already existing records, but the id isn't used
       def id
         self.component_id
       end
+    end
+    
+    class Statement < Base
     end
   end
 
@@ -217,4 +226,6 @@ module Chargify
   class PaymentProfile < Base
   end
   
+  class Statement < Base
+  end
 end
