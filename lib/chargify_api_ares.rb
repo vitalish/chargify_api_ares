@@ -180,6 +180,14 @@ module Chargify
       def id
         self.component_id
       end
+      
+      def create_usage(attrs = {})
+        post :usages, {}, attrs.to_xml(:root => :usage)
+      end
+      
+      def usages(attrs = {})
+        get :usages
+      end
     end
     
     class Statement < Base
